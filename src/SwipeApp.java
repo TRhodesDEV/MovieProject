@@ -24,16 +24,19 @@ import java.util.Map;
 
 public class SwipeApp extends Application {
 
-    private static final String API_KEY = "9396556d77ef0e725870aba95a0aa8d7"; // Replace with your TMDb API key
+    private static final String API_KEY = System.getenv("TMDB_API_KEY");
     private static final String BASE_IMAGE_URL = "https://image.tmdb.org/t/p/w500";
     private List<VBox> movieCards = new ArrayList<>();
     private Map<VBox, Movie> cardToMovieMap = new HashMap<>();
 
-    User user1 = new User();
+    User user1 = new User("Travis");
+    User user2 = new User("Abby");
+
+    User currentUser = user1;
 
     @Override
     public void start(Stage stage) {
-        // Create a StackPane to hold cards
+        // Create a StackPane
         StackPane cardPane = new StackPane();
         cardPane.setStyle("-fx-background-color: #f4f4f4; -fx-padding: 20;");
 
@@ -51,22 +54,19 @@ public class SwipeApp extends Application {
             movieCards.get(movieCards.size() - 1).setOpacity(1); // Unhide top card
         }
 
-
         // Create Buttons
         Button yesButton = new Button("Yes");
         Button noButton = new Button("No");
         Button showLikedMoviesButton = new Button("Show Matches");
 
-        // Set button actions
+        // Set button events
         yesButton.setOnAction(event -> swipeCard(cardPane, 400)); // Click Yes
         noButton.setOnAction(event -> swipeCard(cardPane, -400)); // Click No
         showLikedMoviesButton.setOnAction(event -> showLikedMovies());
 
-
         //Arrange buttons
         HBox buttonBox = new HBox(10, yesButton, noButton, showLikedMoviesButton);
         buttonBox.setStyle("-fx-alignment: center;");
-
         VBox layout = new VBox(10, cardPane, buttonBox);
         layout.setStyle("-fx-alignment: center; -fx-spacing: 10;");
 

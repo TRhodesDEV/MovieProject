@@ -3,10 +3,18 @@ import java.util.List;
 
 public class User {
 
-        public List<Movie> likedMovies = new ArrayList<>();
-        public List<Movie> dislikedMovies = new ArrayList<>();
+        public String username;
+        public List<Movie> likedMovies;
+        public List<Movie> dislikedMovies;
 
-        User(){
+        public User(String username){
+                this.username = username;
+                this.likedMovies = new ArrayList<>();
+                this.dislikedMovies = new ArrayList<>();
+        }
+
+        public String getUsername(){
+                return username;
         }
 
         public List<Movie> getLikedMovies() {
@@ -15,5 +23,13 @@ public class User {
 
         public List<Movie> getDislikedMovies() {
                 return dislikedMovies;
+        }
+
+        public void addLikedMovie(Movie movie){
+                likedMovies.add(movie);
+        }
+
+        public void addDislikedMovie(Movie movie){
+                dislikedMovies.add(movie);
         }
 }
