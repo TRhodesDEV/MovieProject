@@ -1,11 +1,13 @@
 import javafx.animation.TranslateTransition;
 import javafx.application.Application;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -29,16 +31,18 @@ public class SwipeApp extends Application {
     private List<VBox> movieCards = new ArrayList<>();
     private Map<VBox, Movie> cardToMovieMap = new HashMap<>();
 
+
     User user1 = new User("Travis");
     User user2 = new User("Abby");
-
     User currentUser = user1;
+    private Label userLabel;
 
     @Override
     public void start(Stage stage) {
         // Create a StackPane
         StackPane cardPane = new StackPane();
         cardPane.setStyle("-fx-background-color: #f4f4f4; -fx-padding: 20;");
+        BorderPane root = new BorderPane();
 
         // Load movies
         List<Movie> movies = fetchMovies();
@@ -58,16 +62,27 @@ public class SwipeApp extends Application {
         Button yesButton = new Button("Yes");
         Button noButton = new Button("No");
         Button showLikedMoviesButton = new Button("Show Matches");
+        Button switchUserButton = new Button("Switch User");
 
         // Set button events
         yesButton.setOnAction(event -> swipeCard(cardPane, 400)); // Click Yes
         noButton.setOnAction(event -> swipeCard(cardPane, -400)); // Click No
         showLikedMoviesButton.setOnAction(event -> showLikedMovies());
+        switchUserButton.setOnAction(event ->switchUser());
+
+        // Create userLabel to show current user
+        userLabel = new Label("Current User: " + currentUser.getUsername());
+        userLabel.setStyle("-fx-font-size: 14px; -fx-padding: 10; -fx-alignment: center-right;");
+
+        // Show label at the top of the window
+        VBox topBox = new VBox(userLabel);
+        topBox.setAlignment(Pos.TOP_RIGHT);
+        root.setTop(topBox);
 
         //Arrange buttons
-        HBox buttonBox = new HBox(10, yesButton, noButton, showLikedMoviesButton);
+        HBox buttonBox = new HBox(10, yesButton, noButton, showLikedMoviesButton, switchUserButton);
         buttonBox.setStyle("-fx-alignment: center;");
-        VBox layout = new VBox(10, cardPane, buttonBox);
+        VBox layout = new VBox(10, cardPane, buttonBox, root);
         layout.setStyle("-fx-alignment: center; -fx-spacing: 10;");
 
         // Create the scene and show the stage
@@ -75,9 +90,12 @@ public class SwipeApp extends Application {
         stage.setScene(scene);
         stage.setTitle("Movie Cards");
         stage.show();
+
+
+
     }
 
-    //Create movie card for sliding
+    // Create movie card for sliding
 
     private VBox createCard(Movie movie) {
 
@@ -154,7 +172,7 @@ public class SwipeApp extends Application {
             JSONObject jsonResponse = new JSONObject(response.toString());
             JSONArray results = jsonResponse.getJSONArray("results");
 
-            // Extract poster paths and description
+            // Extract poster paths, description, and title
             for (int i = 0; i < results.length(); i++) {
                 JSONObject movie = results.getJSONObject(i);
                 String posterPath = movie.getString("poster_path");
@@ -205,6 +223,11 @@ public class SwipeApp extends Application {
         likedMoviesStage.setScene(scene);
         likedMoviesStage.show();
 
+    }
+
+    private void switchUser(){
+        currentUser = currentUser.equals(user1) ? user2 : user1;
+        System.out.println("Switched to " + currentUser.getUsername());
     }
 
     public static void main(String[] args) {
