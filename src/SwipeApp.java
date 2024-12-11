@@ -74,7 +74,7 @@ public class SwipeApp extends Application {
         userLabel = new Label("Current User: " + currentUser.getUsername());
         userLabel.setStyle("-fx-font-size: 14px; -fx-padding: 10; -fx-alignment: center-right;");
 
-        // Show label at the top of the window
+        // Show user label in window
         VBox topBox = new VBox(userLabel);
         topBox.setAlignment(Pos.TOP_RIGHT);
         root.setTop(topBox);
@@ -90,8 +90,6 @@ public class SwipeApp extends Application {
         stage.setScene(scene);
         stage.setTitle("Movie Cards");
         stage.show();
-
-
 
     }
 
@@ -126,24 +124,22 @@ public class SwipeApp extends Application {
             int index = cardPane.getChildren().size() - 1;
             Movie currentMovie = cardToMovieMap.get(topCard);
 
-            if(endX > 0){
-                user1.likedMovies.add(currentMovie);
-            } else {
-                user1.dislikedMovies.add(currentMovie);
+            if (endX > 0) {
+                currentUser.likedMovies.add(currentMovie);
             }
 
             TranslateTransition transition = new TranslateTransition(Duration.millis(300), topCard);
-            transition.setToX(endX); // Move the card left or right
+            transition.setToX(endX);
 
 
-            transition.setOnFinished(e -> {
+            transition.setOnFinished(event -> {
 
-                cardPane.getChildren().remove(topCard); // Remove the card after animation
+                cardPane.getChildren().remove(topCard); //Remove the card after animation
                 movieCards.remove(topCard);
 
-                if(!cardPane.getChildren().isEmpty()){
+                if (!cardPane.getChildren().isEmpty()) {
                     VBox nextCard = (VBox) cardPane.getChildren().get(cardPane.getChildren().size() - 1);
-                    nextCard.setOpacity(1); //make next card visible
+                    nextCard.setOpacity(1); //Make next card visible
                 }
             });
 
@@ -202,7 +198,7 @@ public class SwipeApp extends Application {
         layout.setStyle("-fx-padding: 10; -fx-alignment: center;");
 
         // Label for every liked movie
-        for(Movie movie : user1.likedMovies) {
+        for(Movie movie : currentUser.likedMovies) {
             Label movieLabel = new Label(movie.getTitle());
             movieLabel.setWrapText(true);
             movieLabel.setStyle("-fx-font-size: 14px;");
@@ -210,7 +206,7 @@ public class SwipeApp extends Application {
         }
 
         // No movies liked case
-        if(user1.likedMovies.isEmpty()) {
+        if(currentUser.likedMovies.isEmpty()) {
             layout.getChildren().add(new Label("You didn't like any movies!"));
         }
 
@@ -227,7 +223,8 @@ public class SwipeApp extends Application {
 
     private void switchUser(){
         currentUser = currentUser.equals(user1) ? user2 : user1;
-        System.out.println("Switched to " + currentUser.getUsername());
+        userLabel.setText("Current User: " + currentUser.getUsername());
+
     }
 
     public static void main(String[] args) {
