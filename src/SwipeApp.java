@@ -74,7 +74,7 @@ public class SwipeApp extends Application {
         // Set button events
         yesButton.setOnAction(event -> swipeCard(cardPane, 400)); // Click Yes
         noButton.setOnAction(event -> swipeCard(cardPane, -400)); // Click No
-        showMatchedMovies.setOnAction(event -> showLikedMovies());
+        showMatchedMovies.setOnAction(event -> showMatches());
         switchUserButton.setOnAction(event ->switchUser());
 
         // Create userLabel to show current user
@@ -154,46 +154,52 @@ public class SwipeApp extends Application {
     }
 
     private List<Movie> fetchMovies() {
+        int page = 1;
+
         List<Movie> movies = new ArrayList<>();
-        try {
-            // Build API URL
-            String urlString = "https://api.themoviedb.org/3/movie/popular?api_key=" + API_KEY;
-            URL url = new URL(urlString);
+        while (page < 5) {
+            try {
+                // Build API URL
+                String urlString = "https://api.themoviedb.org/3/movie/popular?api_key=" + API_KEY + "&page=" + page;
+                URL url = new URL(urlString);
 
-            // Connect and fetch JSON data
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
-            InputStreamReader reader = new InputStreamReader(connection.getInputStream());
+                // Connect and get JSON data
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                connection.setRequestMethod("GET");
+                InputStreamReader reader = new InputStreamReader(connection.getInputStream());
 
-            // Parse JSON response
-            StringBuilder response = new StringBuilder();
-            int read;
-            while ((read = reader.read()) != -1) {
-                response.append((char) read);
+                // Parse JSON response
+                StringBuilder response = new StringBuilder();
+                int read;
+                while ((read = reader.read()) != -1) {
+                    response.append((char) read);
+                }
+                JSONObject jsonResponse = new JSONObject(response.toString());
+                JSONArray results = jsonResponse.getJSONArray("results");
+
+                // Extract poster paths, description, and title
+                for (int i = 0; i < results.length(); i++) {
+                    JSONObject movie = results.getJSONObject(i);
+                    String posterPath = movie.getString("poster_path");
+                    String overview = movie.getString("overview");
+                    String title = movie.getString("title");
+                    String imageUrl = BASE_IMAGE_URL + posterPath;
+
+                    Image posterImage = new Image(imageUrl, true);
+                    movies.add(new Movie(posterImage, overview, title));
+
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-            JSONObject jsonResponse = new JSONObject(response.toString());
-            JSONArray results = jsonResponse.getJSONArray("results");
-
-            // Extract poster paths, description, and title
-            for (int i = 0; i < results.length(); i++) {
-                JSONObject movie = results.getJSONObject(i);
-                String posterPath = movie.getString("poster_path");
-                String overview = movie.getString("overview");
-                String title = movie.getString("title");
-                String imageUrl = BASE_IMAGE_URL + posterPath;
-
-                Image posterImage = new Image(imageUrl, true);
-                movies.add(new Movie(posterImage, overview, title));
-
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
+            page++;
         }
+        System.out.println(movies.size());
         return movies;
     }
 
-    private void showLikedMovies() {
+    private void showMatches() {
 
         // Create a new window for showing liked movies
         Stage likedMoviesStage = new Stage();
@@ -203,17 +209,27 @@ public class SwipeApp extends Application {
         VBox layout = new VBox(10);
         layout.setStyle("-fx-padding: 10; -fx-alignment: center;");
 
+        // Create array list for Matches
+        List<Movie> matches = new ArrayList<>();
+
+
         // Label for every liked movie
-        for(Movie movie : currentUser.likedMovies) {
-            Label movieLabel = new Label(movie.getTitle());
-            movieLabel.setWrapText(true);
-            movieLabel.setStyle("-fx-font-size: 14px;");
-            layout.getChildren().add(movieLabel);
+        for(int i = 0; i < user1.likedMovies.size(); i++ ) {
+
+            if(user2.likedMovies.contains(user1.likedMovies.get(i))){
+
+                matches.add(user1.likedMovies.get(i));
+
+                Label movieLabel = new Label(user1.likedMovies.get(i).getTitle());
+                movieLabel.setWrapText(true);
+                movieLabel.setStyle("-fx-font-size: 14px;");
+                layout.getChildren().add(movieLabel);
+            }
         }
 
         // No movies liked case
-        if(currentUser.likedMovies.isEmpty()) {
-            layout.getChildren().add(new Label("You didn't like any movies!"));
+        if(matches.isEmpty()) {
+            layout.getChildren().add(new Label("You didn't like any of the same movies!"));
         }
 
         // Add scrolling pane so user can see selections better
@@ -253,7 +269,7 @@ public class SwipeApp extends Application {
 
         cardIndex = cardPane.getChildren().size() - 1;
         cardPane.getChildren().get(cardIndex).setOpacity(1);
-        
+
     }
 
     public static void main(String[] args) {
