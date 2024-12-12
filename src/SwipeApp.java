@@ -5,6 +5,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
@@ -33,17 +34,62 @@ public class SwipeApp extends Application {
     private List<VBox> copiedFullMC = new ArrayList<>();
 
 
-    User user1 = new User("Travis");
-    User user2 = new User("Abby");
+    User user1 = new User();
+    User user2 = new User();
     User currentUser = user1;
     private Label userLabel;
     int cardIndex;
 
     StackPane cardPane = new StackPane();
 
+
     @Override
     public void start(Stage stage) {
-        // Create a StackPane
+            startupPage(stage);
+    }
+
+    private void startupPage(Stage stage) {
+        Button startButton = new Button("START");
+        StackPane startPane = new StackPane(startButton);
+        startPane.setStyle("-fx-padding: 20; -fx-alignment: center;");
+        Scene startScene = new Scene(startPane, 400, 300);
+
+        Stage startupStage = new Stage();
+        startupStage.setScene(startScene);
+        startupStage.setTitle("Start Screen");
+        startupStage.show();
+
+        startButton.setOnAction(event -> {
+            startupStage.close();
+            usernamePage(stage);
+        });
+    }
+
+    private void usernamePage(Stage stage){
+
+        TextField user1name = new TextField();
+        user1name.setPromptText("Enter user 1's name: ");
+        TextField user2name = new TextField();
+        user2name.setPromptText("Enter user 2's name: ");
+
+        Button usernameConfirmButton = new Button("Confirm");
+        usernameConfirmButton.setOnAction(event -> {
+            user1.username = user1name.getText();
+            user2.username = user2name.getText();
+            mainApplication(stage);
+        });
+
+        VBox usernameLayout = new VBox(10, new Label("Enter Usernames:"), user1name, user2name, usernameConfirmButton);
+        usernameLayout.setStyle("-fx-padding: 20; -fx-alignment: center;");
+
+        Scene usernameScene = new Scene(usernameLayout, 400, 300);
+        stage.setScene(usernameScene);
+        stage.setTitle("Username Page");
+        stage.show();
+
+    }
+
+    private void mainApplication(Stage stage) {
 
         cardPane.setStyle("-fx-background-color: #f4f4f4; -fx-padding: 20;");
         BorderPane root = new BorderPane();
@@ -57,8 +103,6 @@ public class SwipeApp extends Application {
             cardPane.getChildren().add(card); // Add cards to the StackPane
             copiedFullMC.add(card);
         }
-
-
 
         //Show top card
         if(!movieCards.isEmpty()){
@@ -87,9 +131,13 @@ public class SwipeApp extends Application {
         root.setTop(topBox);
 
         // Arrange buttons
-        HBox buttonBox = new HBox(10, yesButton, noButton, showMatchedMovies, switchUserButton);
-        buttonBox.setStyle("-fx-alignment: center;");
-        VBox layout = new VBox(10, cardPane, buttonBox, root);
+        HBox yesNoButtonBox = new HBox(10, noButton, yesButton);
+        yesNoButtonBox.setStyle("-fx-alignment: center;");
+
+        HBox userButtons = new HBox(10,showMatchedMovies, switchUserButton);
+        userButtons.setStyle("-fx-alignment: center;");
+
+        VBox layout = new VBox(10, cardPane, yesNoButtonBox,userButtons, root);
         layout.setStyle("-fx-alignment: center; -fx-spacing: 10;");
 
         // Create the scene and show the stage
@@ -97,7 +145,6 @@ public class SwipeApp extends Application {
         stage.setScene(scene);
         stage.setTitle("Movie Cards");
         stage.show();
-
     }
 
     // Create movie card for sliding
@@ -195,7 +242,6 @@ public class SwipeApp extends Application {
             }
             page++;
         }
-        System.out.println(movies.size());
         return movies;
     }
 

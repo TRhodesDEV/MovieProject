@@ -6,6 +6,10 @@ public class User {
         public String username;
         public List<Movie> likedMovies;
 
+        public User() {
+                this.likedMovies = new ArrayList<>();
+        }
+
         public User(String username) {
                 this.username = username;
                 this.likedMovies = new ArrayList<>();
