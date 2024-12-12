@@ -30,17 +30,21 @@ public class SwipeApp extends Application {
     private static final String BASE_IMAGE_URL = "https://image.tmdb.org/t/p/w500";
     private List<VBox> movieCards = new ArrayList<>();
     private Map<VBox, Movie> cardToMovieMap = new HashMap<>();
+    private List<VBox> copiedFullMC = new ArrayList<>();
 
 
     User user1 = new User("Travis");
     User user2 = new User("Abby");
     User currentUser = user1;
     private Label userLabel;
+    int cardIndex;
+
+    StackPane cardPane = new StackPane();
 
     @Override
     public void start(Stage stage) {
         // Create a StackPane
-        StackPane cardPane = new StackPane();
+
         cardPane.setStyle("-fx-background-color: #f4f4f4; -fx-padding: 20;");
         BorderPane root = new BorderPane();
 
@@ -51,7 +55,10 @@ public class SwipeApp extends Application {
             card.setOpacity(0); //Hide cards as they are loaded
             movieCards.add(card);
             cardPane.getChildren().add(card); // Add cards to the StackPane
+            copiedFullMC.add(card);
         }
+
+
 
         //Show top card
         if(!movieCards.isEmpty()){
@@ -61,13 +68,13 @@ public class SwipeApp extends Application {
         // Create Buttons
         Button yesButton = new Button("Yes");
         Button noButton = new Button("No");
-        Button showLikedMoviesButton = new Button("Show Matches");
+        Button showMatchedMovies = new Button("Show Matches");
         Button switchUserButton = new Button("Switch User");
 
         // Set button events
         yesButton.setOnAction(event -> swipeCard(cardPane, 400)); // Click Yes
         noButton.setOnAction(event -> swipeCard(cardPane, -400)); // Click No
-        showLikedMoviesButton.setOnAction(event -> showLikedMovies());
+        showMatchedMovies.setOnAction(event -> showLikedMovies());
         switchUserButton.setOnAction(event ->switchUser());
 
         // Create userLabel to show current user
@@ -79,8 +86,8 @@ public class SwipeApp extends Application {
         topBox.setAlignment(Pos.TOP_RIGHT);
         root.setTop(topBox);
 
-        //Arrange buttons
-        HBox buttonBox = new HBox(10, yesButton, noButton, showLikedMoviesButton, switchUserButton);
+        // Arrange buttons
+        HBox buttonBox = new HBox(10, yesButton, noButton, showMatchedMovies, switchUserButton);
         buttonBox.setStyle("-fx-alignment: center;");
         VBox layout = new VBox(10, cardPane, buttonBox, root);
         layout.setStyle("-fx-alignment: center; -fx-spacing: 10;");
@@ -94,7 +101,6 @@ public class SwipeApp extends Application {
     }
 
     // Create movie card for sliding
-
     private VBox createCard(Movie movie) {
 
         ImageView posterView  = new ImageView(movie.getPoster());
@@ -121,7 +127,7 @@ public class SwipeApp extends Application {
         if (!cardPane.getChildren().isEmpty()) {
             VBox topCard = (VBox) cardPane.getChildren().get(cardPane.getChildren().size() - 1);
 
-            int index = cardPane.getChildren().size() - 1;
+            cardIndex = cardPane.getChildren().size() - 1;
             Movie currentMovie = cardToMovieMap.get(topCard);
 
             if (endX > 0) {
@@ -225,6 +231,29 @@ public class SwipeApp extends Application {
         currentUser = currentUser.equals(user1) ? user2 : user1;
         userLabel.setText("Current User: " + currentUser.getUsername());
 
+        resetCardStack();
+        updateCardDisplay();
+    }
+
+    private void resetCardStack() {
+        cardIndex = 0;
+        cardPane.getChildren().clear();
+    }
+
+    private void updateCardDisplay() {
+        movieCards = copiedFullMC;
+
+        while (cardIndex < movieCards.size()) {
+            VBox topCard = movieCards.get(cardIndex);
+            topCard.setOpacity(0);
+            cardPane.getChildren().add(topCard);
+            cardPane.getChildren().get(cardIndex).setTranslateX(0);
+            cardIndex++;
+        }
+
+        cardIndex = cardPane.getChildren().size() - 1;
+        cardPane.getChildren().get(cardIndex).setOpacity(1);
+        
     }
 
     public static void main(String[] args) {
